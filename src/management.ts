@@ -334,7 +334,7 @@ export const getPrivateKey = async (id: string, index: string, path?: string, pa
   return pk.privateKey as string
 }
 
-export const getAddress = async (id: string, index: string, path?: string, pwd?: string, print = true) => {
+export const getAddress = async (id: string, index: string, path?: string, pwd?: string, print = true, count: string = '1') => {
   const password = pwd ?? config.getValue(ConfigOption.KMS_PASSWORD)
   const pathToWallet = path || homedir() + '/.tatumrc/wallet.dat'
   if (!existsSync(pathToWallet)) {
@@ -351,15 +351,20 @@ export const getAddress = async (id: string, index: string, path?: string, pwd?:
     console.error(JSON.stringify({ error: `No such wallet for signatureId '${id}'.` }, null, 2))
     return null
   }
-  const pk = {
-    address: wallet[id].address
-      ? wallet[id].address
-      : await generateAddressFromXPub(wallet[id].chain, wallet[id].testnet, wallet[id].xpub, parseInt(index)),
+
+  for (let i = parseInt(index), s = i + parseInt(count); i < s; ++i) {
+    const pk = {
+      address: wallet[id].address
+          ? wallet[id].address
+          : await generateAddressFromXPub(wallet[id].chain, wallet[id].testnet, wallet[id].xpub, i),
+      index: i,
+    }
+    if (print) {
+      console.log(JSON.stringify(pk))
+    } else {
+      return { address: pk.address }
+    }
   }
-  if (print) {
-    console.log(JSON.stringify(pk, null, 2))
-  }
-  return { address: pk.address }
 }
 
 export const removeWallet = async (id: string, pwd: string, path?: string) => {

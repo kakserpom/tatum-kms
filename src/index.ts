@@ -169,7 +169,7 @@ const startup = async () => {
       await getPrivateKey(command[1], command[2], flags.path)
       break
     case 'getaddress':
-      await getAddress(command[1], command[2], flags.path)
+      await getAddress(command[1], command[2], flags.path, undefined, true, command[3] ?? '1')
       break
     case 'removewallet':
       await removeWallet(command[1], await getPassword(getPasswordType(), axiosInstance), flags.path)
